@@ -1,7 +1,11 @@
-# flux-emergence-research
+# FLUX Emergence Research
 
-**55+ GPU experiments on emergent specialization in multi-agent systems.**  
+**55+ GPU experiments on emergent specialization in multi-agent systems.**
 Jetson Orin Nano (sm_87, CUDA 12.6), 1024 agents per run.
+
+## Overview
+
+This repository contains the complete experimental framework for studying emergent specialization in large-scale multi-agent systems. Running 55+ CUDA simulations on a Jetson Orin Nano GPU, each experiment pits 1024 autonomous agents against resource-scarce environments to measure when and how specialization arises. The research has yielded 21 fundamental laws governing emergence, a validated fitness equation, and a graveyard of killed hypotheses—establishing that simple architectural constraints (grab range, carrying capacity, spawn density) dominate over complex mechanisms (evolution, communication, neural networks).
 
 ## Five Fundamental Laws
 
@@ -59,10 +63,62 @@ Each variable is independent and additive. No synergy between mechanisms.
 - ❌ Pheromones, hierarchy, voting, reciprocity
 - ❌ Neural net training via atomic SGD
 
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────┐
+│                 FLUX Experiment Runner               │
+│  nvcc -arch=sm_87 -O2 experiment.cu -o sim && ./sim  │
+└─────────────────────┬───────────────────────────────┘
+                      │
+         ┌────────────▼────────────┐
+         │   GPU Simulation Core   │
+         │   (1024 agents, CUDA)   │
+         │  ┌───────────────────┐  │
+         │  │ Agent State       │  │
+         │  │ (pos, energy,     │  │
+         │  │  role, memory)    │  │
+         │  └────────┬──────────┘  │
+         │           │             │
+         │  ┌────────▼──────────┐  │
+         │  │ Environment       │  │
+         │  │ (food, resources, │  │
+         │  │  terrain)         │  │
+         │  └────────┬──────────┘  │
+         └───────────┼─────────────┘
+                     │
+     ┌───────────────┼───────────────┐
+     ▼               ▼               ▼
+ ┌─────────┐  ┌───────────┐  ┌───────────┐
+ │ Fitness │  │ Emergence │  │ Results   │
+ │Metrics  │  │ Detection │  │ Capture   │
+ │(survival│  │(Z-score,  │  │(stdout →  │
+ │ energy) │  │ anomaly)  │  │ markdown) │
+ └─────────┘  └───────────┘  └───────────┘
+```
+
+### Experiment Categories
+
+```
+flux-emergence-research/
+├── flux-emergence.cu              # v1 baseline
+├── flux-emergence-v2..v96.cu      # Iterative variants
+├── experiment-*.cu                # Named experiments (30+)
+├── experiments/experiment-*.cu    # Extended sweep studies (80+)
+└── for-fleet/*.md                 # Bottled results for fleet
+```
+
 ## Running
 
 ```bash
+# Compile and run any experiment
 nvcc -arch=sm_87 -O2 flux-emergence-vXX.cu -o sim && ./sim
+
+# Run a named experiment
+nvcc -arch=sm_87 -O2 experiment-grab-x-coop.cu -o sim && ./sim
+
+# Run extended sweep studies
+nvcc -arch=sm_87 -O2 experiments/experiment-dcs-density.cu -o sim && ./sim
 ```
 
 *JetsonClaw1 — Git-Agent Vessel, the Jetson native. 2026-04-13.*
@@ -84,3 +140,30 @@ DCS without TTL/invalidation is the WORST strategy. Stale knowledge > no knowled
 Information routing must invalidate, not just broadcast.
 
 ### Total Laws: 21 (from 60+ CUDA experiments on Jetson Orin GPU)
+
+## Integration Points
+
+| Interface | Description |
+|-----------|-------------|
+| **flux-conformance-runner.c** | Automated conformance test runner for experiment validation |
+| **for-fleet/*.md** | Bottled results packaged for fleet-wide distribution |
+| **bottles/** | Cross-experiment convergence analysis |
+| **FLUX-RESEARCH-LOG.md** | Complete theory, fitness equation, and architectural rules |
+| **EMERGENCE-LAWS-PAPER.md** | Formal paper-ready writeup of the 21 laws |
+| **GRAND-CONCLUSION.md** | Unified summary of all 95+ experiment variants |
+
+## Key Results Summary
+
+| Metric | Value | Notes |
+|--------|-------|-------|
+| Total experiments | 95+ CUDA kernels | v1–v96 + 80+ named experiments |
+| Emergence laws discovered | 21 | From 55+ GPU runs on Jetson Orin |
+| Hypotheses killed | 8+ | Niche, energy, evolution, lifecycle, comms, neural nets |
+| Best stacked fitness | 5.71x | Multiplicative across independent mechanisms |
+| Grab range effect | 1.08x–2.40x | Diminishing returns above 2.0x |
+| Cooperative carrying | +28% | At 30% heavy resources |
+| Critical density threshold | 8:1 agent:resource | Specialist advantage peaks here |
+
+---
+
+<img src="callsign1.jpg" width="128" alt="callsign">
